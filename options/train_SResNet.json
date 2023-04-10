@@ -1,0 +1,71 @@
+{
+  "task": "SResNet30_16_16"  //  root/task/images-models-options
+  , "gpu_ids": [0]
+
+  , "scale": 1       // broadcast to "netG" if SISR
+  , "n_channels": 3  // broadcast to "datasets", 1 for grayscale, 3 for color
+
+  , "path": {
+    "root": "denoising"            // "denoising" | "superresolution"
+    , "pretrained_netG": null      // path of pretrained model
+  }
+
+  , "datasets": {
+    "train": {
+      "name": "train_dataset"           // just name
+      , "dataroot_H": "trainsets/DIV2K/DIV2K_train_LR_bicubic/x2_sub"// path of H training dataset
+      , "dataroot_L": null              // path of L training dataset
+      , "H_size": 40                    // patch size 40 | 64 | 96 | 128 | 192
+      , "sigma": 30                     // 15, 25, 50 for DnCNN | [0, 75] for FFDNet and FDnCNN
+      , "sigma_test": 30                // 15, 25, 50 for DnCNN and ffdnet
+
+      , "dataloader_shuffle": true
+      , "dataloader_num_workers": 1
+      , "dataloader_batch_size": 32     // batch size 1 | 16 | 32 | 48 | 64 | 128
+    }
+    , "test": {
+      "name": "test_dataset"            // just name
+      , "dataroot_H": "testsets/DIV2K_valid_LR_bicubic/X2"  // path of H testing dataset
+      , "dataroot_L": null              // path of L testing dataset
+
+      , "sigma": 30                     // 15, 25, 50 for DnCNN | [0, 75] for FFDNet and FDnCNN
+      , "sigma_test": 30                // 15, 25, 50 for DnCNN and ffdnet
+
+    }
+  }
+
+  , "netG": {
+    "net_type": "SResNet" // "dncnn" | "fdncnn" | "ffdnet" | "srmd" | "dpsr" | "msrresnet0" |  "msrresnet1" | "rrdb" 
+    , "in_nc": 3        // input channel number
+    , "out_nc": 3       // ouput channel number
+    , "nc": 64          // 64 for "dncnn"
+    , "nb": 16          //total number of basic blocks
+    , "nr": 16           //total number of residual calculations
+    , "upsample_mode": "convtranspose"  // "pixelshuffle" | "convtranspose" | "upconv"
+    , "downsample_mode": "strideconv"   // "strideconv" | "avgpool" | "maxpool"
+
+    , "init_type": "orthogonal"         // "orthogonal" | "normal" | "uniform" | "xavier_normal" | "xavier_uniform" | "kaiming_normal" | "kaiming_uniform"
+    , "init_bn_type": "uniform"         // "uniform" | "constant"
+    , "init_gain": 0.2
+  }
+
+  , "train": {
+    "G_lossfn_type": "l2"               // "l1" preferred | "l2sum" | "l2" | "ssim" 
+    , "G_lossfn_weight": 1.0            // default
+
+    , "G_optimizer_type": "adam"        // fixed, adam is enough
+    , "G_optimizer_lr": 1e-4            // learning rate
+    , "G_optimizer_clipgrad": null      // unused
+
+    , "G_scheduler_type": "MultiStepLR" // "MultiStepLR" is enough
+    , "G_scheduler_milestones": [20000, 40000, 60000, 80000, 100000]
+    , "G_scheduler_gamma": 0.5
+
+    , "G_regularizer_orthstep": null    // unused
+    , "G_regularizer_clipstep": null    // unused
+
+    , "checkpoint_test": 1000           // for testing
+    , "checkpoint_save": 5000           // for saving model
+    , "checkpoint_print": 1000           // for print
+  }
+}
